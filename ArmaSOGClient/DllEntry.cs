@@ -17,12 +17,13 @@ namespace ArmaSOGClient
         public static string ASC_Host = "127.0.0.1";
         public static int ASC_Port = 8080;
         public static string ASC_Uri = "http://localhost:3002/rss/latest";
-        public static ExtensionCallback callback;
-        public static bool ASC_ContextLog = true;
+        public static bool ASC_ContextLog = false;
         public static bool ASC_Debug = false;
         public static bool ASC_InitCheck = false;
         public static IntPtr ASC_Context;
         public static string ASC_LogFolder = "\\@sog_client\\logs";
+        public static string SteamID = "";
+        public static ExtensionCallback callback;
         public delegate int ExtensionCallback(string name, string function, string data);
 
         public static void ASC_Init()
@@ -58,6 +59,8 @@ namespace ArmaSOGClient
 
         public static void Log(string msg, string logType)
         {
+            if (!ASC_Debug)
+                return;
             string logFileName = logType + ".log";
             string path = Environment.CurrentDirectory + ASC_LogFolder;
             if (!Directory.Exists(path))
@@ -100,6 +103,24 @@ namespace ArmaSOGClient
         public static void RvExtensionVersion(StringBuilder output, int outputSize)
         {
             output.Append(ASC_Version, 0, Math.Min(ASC_Version.Length, outputSize));
+        }
+
+        [DllExport("RVExtensionContext", CallingConvention = CallingConvention.Winapi)]
+        public static void RVExtensionContext(IntPtr args, int argsCnt)
+        {
+            if (!(ASC_Context != args))
+                return;
+            ASC_Context = args;
+            string[] strArray = new string[argsCnt];
+            int size = IntPtr.Size;
+            for (int index = 0; index < argsCnt; ++index)
+                strArray[index] = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(args, index * size));
+            SteamID = strArray[0].ToString();
+            if (!ASC_ContextLog)
+                return;
+            ASC_Contextlog("StreamID: " + strArray[0].ToString());
+            ASC_Contextlog("MissionName: " + strArray[2].ToString());
+            ASC_Contextlog("ServerName: " + strArray[3].ToString());
         }
 
         [DllExport("RVExtension", CallingConvention = CallingConvention.Winapi)]
@@ -408,20 +429,6 @@ namespace ArmaSOGClient
                 ASC_Errorlog($"Error: {ex.Message} {ex.StackTrace}");
                 return $"Error: {ex.Message} {ex.StackTrace}";
             }
-        }
-
-        public static void RVExtensionContext(IntPtr args, int argsCnt)
-        {
-            if (!ASC_ContextLog || !(ASC_Context != args))
-                return;
-            ASC_Context = args;
-            string[] strArray = new string[argsCnt];
-            int size = IntPtr.Size;
-            for (int index = 0; index < argsCnt; ++index)
-                strArray[index] = Marshal.PtrToStringAnsi(Marshal.ReadIntPtr(args, index * size));
-            ASC_Contextlog("StreamID: " + strArray[0].ToString());
-            ASC_Contextlog("MissionName: " + strArray[2].ToString());
-            ASC_Contextlog("ServerName: " + strArray[3].ToString());
         }
     }
 }
