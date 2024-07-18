@@ -113,7 +113,7 @@ namespace ArmaSOGClient
             });
         }
 
-        public async Task<List<List<string>>> FetchUnlocks(string typeCol) => await Task.Run(() =>
+        public async Task<List<List<string>>> FetchUnlocksAsync(string typeCol) => await Task.Run(() =>
         {
             try
             {

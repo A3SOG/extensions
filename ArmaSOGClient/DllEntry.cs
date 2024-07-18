@@ -265,7 +265,7 @@ namespace ArmaSOGClient
                     callback("ArmaSOGClient", "sog_client_ext_fnc_fetchNews", response);
                 });
                 output.Append("Fetching News");
-                return 100;
+                return 200;
             }
 
             if (function == "fetch_unlocks" && argsCnt >= 1)
@@ -274,14 +274,14 @@ namespace ArmaSOGClient
 
                 Task.Run(async () => await FetchUnlocks(typeCol));
                 output.Append("Fetching unlocks from LiteDB");
-                return 100;
+                return 200;
             }
 
             if (function == "first_login")
             {
                 Task.Run(async () => await FirstLogin());
                 output.Append("Creating LiteDB Collections");
-                return 100;
+                return 200;
             }
 
             if (function == "save_status" && argsCnt >= 2)
@@ -291,7 +291,7 @@ namespace ArmaSOGClient
 
                 Task.Run(async () => await SaveStatus(uid, status));
                 output.Append("Saving status to LiteDB");
-                return 100;
+                return 200;
             }
 
             if (function == "save_unlock" && argsCnt >= 3)
@@ -302,7 +302,7 @@ namespace ArmaSOGClient
 
                 Task.Run(async () => await SaveUnlock(typeCol, className, typeInt));
                 output.Append("Saving unlock to LiteDB");
-                return 100;
+                return 200;
             }
 
             output.Append("Available Functions: fnc1, fnc2, fnc3, fnc4, fetch_news, fetch_unlocks, first_login, save_status, save_unlock");
@@ -360,7 +360,7 @@ namespace ArmaSOGClient
 
             try
             {
-                await dbHandler.FetchUnlocks(typeCol.Trim('"'));
+                await dbHandler.FetchUnlocksAsync(typeCol.Trim('"'));
                 return "Success";
             }
             catch (Exception ex)
